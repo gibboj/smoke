@@ -1,48 +1,60 @@
 import React, { RefObject, useState } from 'react';
-import { Renderer } from './renderer/Renderer';
+
+import { GRID_DEFAULT_DIMENSIONS, GRID_DEFAULT_STEPS, GRID_DEFAULT_VISIBILITY } from './constants';
 import { Button } from './ui/Button';
+import { TextInput } from './ui/Input';
+import Loop from './Loop'
 import useWindowSize from './useWindowSize';
 
-const threeRenderer = new Renderer()
-function SmokeContainer() {
-    const canvasContainer: RefObject<HTMLDivElement> = React.createRef()
-    const size = useWindowSize();
-    const [isGridVisible, setIsGridVisible] = useState<Boolean>(true);
-    const [gridWidth, setGridWidth] = useState<number>(50);
-    const [gridHeight, setGridHeight] = useState<number>(40);
-    const [gridSteps, setGridSteps] = useState<number>(10);
-    React.useEffect(() => {
-        threeRenderer.handleResize(size)
-    }, [size])
+function SmokeContainer({ loop }: { loop: Loop }) {
+  const canvasContainer: RefObject<HTMLDivElement> = React.createRef()
+  const size = useWindowSize();
 
+  const [isGridVisible, setIsGridVisible] = useState<Boolean>(GRID_DEFAULT_VISIBILITY);
+  const [gridWidth, setGridWidth] = useState<number>(GRID_DEFAULT_DIMENSIONS.width);
+  const [gridHeight, setGridHeight] = useState<number>(GRID_DEFAULT_DIMENSIONS.height);
+  const [gridSteps, setGridSteps] = useState<number>(GRID_DEFAULT_STEPS);
 
-    React.useEffect(() => {
-        threeRenderer.setGridVisibility(isGridVisible)
-    }, [isGridVisible, gridHeight, gridWidth, gridSteps]);
+  React.useEffect(() => {
+    loop.handleResize(size)
+  }, [loop, size])
 
-    React.useEffect(() => {
-        threeRenderer.updateGrid({ width: gridWidth, height: gridHeight }, gridSteps)
-    }, [gridHeight, gridWidth, gridSteps]);
+  React.useEffect(() => {
+    loop.setGridVisibility(isGridVisible)
+  }, [loop, isGridVisible, gridHeight, gridWidth, gridSteps]);
 
-    React.useEffect(() => {
-        if (canvasContainer.current) {
-            threeRenderer.init({ element: canvasContainer.current, gridVisible: isGridVisible })
-        }
-    }, [canvasContainer, isGridVisible]); // Make sure the effect runs only once
+  React.useEffect(() => {
+    loop.updateGrid({ width: gridWidth, height: gridHeight }, gridSteps)
+  }, [loop, gridHeight, gridWidth, gridSteps]);
 
-    return (
-        <div className="grid" >
-            <div style={{ "gridArea": "main" }} ref={canvasContainer} ></div>
-            <div className="sidebar" style={{ "gridArea": "sidebar" }}>
-                <label>Height</label><input type="number" onChange={(e) => setGridHeight(parseInt(e.currentTarget.value))} value={gridHeight} />
-                <label>Width</label><input type="number" onChange={(e) => setGridWidth(parseInt(e.currentTarget.value))} value={gridWidth} />
-                <label>Steps</label><input type="number" onChange={(e) => setGridSteps(parseInt(e.currentTarget.value))} value={gridSteps} />
-                <Button onClick={() => setIsGridVisible(!isGridVisible)}><span>{isGridVisible ? "Hide Grid" : "Show Grid"}</span></Button>
-                <Button>Show Cube</Button>
-                <Button>Add Smoke</Button>
-            </div>
+  React.useEffect(() => {
+    if (canvasContainer.current) {
+      loop.init(canvasContainer.current)
+    }
+  }, [loop, canvasContainer]); // Make sure the effect runs only once
+
+  return (
+    <div className="grid" >
+      <div style={{ "gridArea": "main" }} ref={canvasContainer} ></div>
+      <div className="sidebar" style={{ "gridArea": "sidebar" }}>
+        <div>
+          <TextInput label="Height" type="number" onChange={(e) => setGridHeight(parseInt(e.currentTarget.value))} value={gridHeight} />
         </div>
-    )
+        <div>
+          <TextInput label="Width" type="number" onChange={(e) =>
+            setGridWidth(parseInt(e.currentTarget.value))} value={gridWidth} />
+        </div>
+        <div>
+          <TextInput label="Steps" onChange={(e) => setGridSteps(parseInt(e.currentTarget.value))} value={gridSteps} />
+        </div>
+
+        <Button onClick={() => setIsGridVisible(!isGridVisible)}>
+          <span>{isGridVisible ? "Hide Grid" : "Show Grid"}</span>
+        </Button>
+        <Button>Add Smoke</Button>
+      </div>
+    </div>
+  )
 }
 
 export default SmokeContainer
