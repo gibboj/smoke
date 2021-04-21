@@ -31,7 +31,7 @@ class DebugUI {
     for (let step = 0; step < steps * (steps - 0); step++) {
       const horizontal = topLeftX + Math.floor(step / steps) * stepSizeWidth;
       const vertical = topLeftY + Math.round(step % steps) * stepSizeHeight;
-      const geometry = new THREE.CircleGeometry(stepSizeWidth / 2 * 0.3, 16);
+      const geometry = new THREE.CircleGeometry(stepSizeWidth / 2 * 0.9, 16);
       const circle = new THREE.Mesh(geometry, material);
       circle.position.set(horizontal, vertical, 0)
       renderer.add(circle);

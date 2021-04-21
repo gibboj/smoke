@@ -25,7 +25,7 @@ export class Renderer implements RenderProps {
     this.renderer = new THREE.WebGLRenderer();
     this.camera = new THREE.PerspectiveCamera(45, this.getAspectRatio(), 1, 500);
     this.raycaster = new THREE.Raycaster();
-    this.mouse = new THREE.Vector2(0, 0);
+    this.mouse = new THREE.Vector2(-1, -1);
   }
 
   init({ element }: RenderInitProps) {
@@ -40,6 +40,8 @@ export class Renderer implements RenderProps {
 
     const animate = () => {
       requestAnimationFrame(animate);
+      // Maybe do intersection of the line between the mouse moves
+      // This way we don't skip space between renders
       this.raycaster.setFromCamera(this.mouse, this.camera);
       // calculate objects intersecting the picking ray
       const intersects = this.raycaster.intersectObjects(this.scene.children);
