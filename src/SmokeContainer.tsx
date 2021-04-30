@@ -1,56 +1,88 @@
-import React, { RefObject, useState } from 'react';
-
-import { GRID_DEFAULT_DIMENSIONS, GRID_DEFAULT_STEPS, GRID_DEFAULT_VISIBILITY } from './constants';
+import React, { RefObject, useRef } from 'react';
 import { Button } from './ui/Button';
 import { TextInput } from './ui/Input';
 import Loop from './Loop'
 import useWindowSize from './useWindowSize';
 
-function SmokeContainer({ loop }: { loop: Loop }) {
-  const canvasContainer: RefObject<HTMLDivElement> = React.createRef()
+function SmokeContainer({
+  loop,
+  containerWidth,
+  containerHeight,
+  setContainerHeight,
+  setContainerWidth,
+  stepsWidth,
+  stepsHeight,
+  setStepsWidth,
+  setStepsHeight,
+  setElement,
+  debugState }: {
+    loop: Loop,
+    containerWidth: number,
+    containerHeight: number,
+    stepsWidth: number,
+    stepsHeight: number,
+    setStepsWidth: (input: number) => void,
+    setStepsHeight: (input: number) => void,
+    setContainerHeight: (input: number) => void,
+    setContainerWidth: (input: number) => void,
+    setElement: (element: HTMLDivElement) => void,
+    debugState: number,
+  }) {
+  const canvasContainer: RefObject<HTMLDivElement> = useRef(null)
   const size = useWindowSize();
-
-  const [isGridVisible, setIsGridVisible] = useState<Boolean>(GRID_DEFAULT_VISIBILITY);
-  const [gridWidth, setGridWidth] = useState<number>(GRID_DEFAULT_DIMENSIONS.width);
-  const [gridHeight, setGridHeight] = useState<number>(GRID_DEFAULT_DIMENSIONS.height);
-  const [gridSteps, setGridSteps] = useState<number>(GRID_DEFAULT_STEPS);
 
   React.useEffect(() => {
     loop.handleResize(size)
   }, [loop, size])
 
   React.useEffect(() => {
-    loop.setGridVisibility(isGridVisible)
-  }, [loop, isGridVisible, gridHeight, gridWidth, gridSteps]);
+    loop.setGridVisibility(true)
+  }, [loop, containerWidth, containerHeight, stepsWidth]);
 
   React.useEffect(() => {
-    loop.updateGrid({ width: gridWidth, height: gridHeight }, gridSteps)
-  }, [loop, gridHeight, gridWidth, gridSteps]);
+    loop.updateGrid({ containerWidth, containerHeight, stepsWidth, stepsHeight })
+  }, [loop, containerWidth, containerHeight, stepsWidth, stepsHeight]);
 
   React.useEffect(() => {
     if (canvasContainer.current) {
-      loop.init(canvasContainer.current)
+      setElement(canvasContainer.current)
     }
-  }, [loop, canvasContainer]); // Make sure the effect runs only once
+  }, [canvasContainer, setElement]); // Make sure the effect runs only once
+
+  const handleContainerHeight = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.currentTarget.value)
+    if (value > 0) {
+      setContainerHeight(value)
+    }
+  }
+
+  const handleContainerWidth = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.currentTarget.value)
+    if (value > 0) {
+      setContainerWidth(value)
+    }
+  }
 
   return (
     <div className="grid" >
       <div style={{ "gridArea": "main" }} ref={canvasContainer} ></div>
       <div className="sidebar" style={{ "gridArea": "sidebar" }}>
         <div>
-          <TextInput label="Height" type="number" onChange={(e) => setGridHeight(parseInt(e.currentTarget.value))} value={gridHeight} />
+          <TextInput label="Height" type="number"
+            onChange={handleContainerHeight} value={containerHeight} />
         </div>
         <div>
-          <TextInput label="Width" type="number" onChange={(e) =>
-            setGridWidth(parseInt(e.currentTarget.value))} value={gridWidth} />
+          <TextInput label="Width" type="number"
+            onChange={handleContainerWidth} value={containerWidth} />
         </div>
         <div>
-          <TextInput label="Steps" onChange={(e) => setGridSteps(parseInt(e.currentTarget.value))} value={gridSteps} />
+          <TextInput label="Steps"
+            onChange={(e) => setStepsWidth(parseInt(e.currentTarget.value))} value={stepsWidth} />
         </div>
 
-        <Button onClick={() => setIsGridVisible(!isGridVisible)}>
+        {/* <Button onClick={() => setIsGridVisible(!isGridVisible)}>
           <span>{isGridVisible ? "Hide Grid" : "Show Grid"}</span>
-        </Button>
+        </Button> */}
         <Button>Add Smoke</Button>
       </div>
     </div>

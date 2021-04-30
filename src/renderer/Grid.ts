@@ -1,17 +1,20 @@
 import * as THREE from "three";
-import { Dimensions } from "../constants";
+import { GridProps } from "../constants";
+import { Renderer } from "./Renderer";
 
 
-class Grid {
-  width: number;
-  height: number;
-  steps: number;
+class Grid implements GridProps {
+  containerWidth: number;
+  containerHeight: number;
+  stepsWidth: number;
+  stepsHeight: number;
   geometery: THREE.Group | null;
 
-  constructor({ width, height }: Dimensions = { width: 50, height: 50 }, steps: number = 10) {
-    this.width = width;
-    this.height = height;
-    this.steps = steps;
+  constructor(props: GridProps) {
+    this.containerWidth = props.containerWidth;
+    this.containerHeight = props.containerHeight;
+    this.stepsWidth = props.stepsWidth;
+    this.stepsHeight = props.stepsHeight;
     this.geometery = null;
   }
 
@@ -19,11 +22,15 @@ class Grid {
     this.geometery && (this.geometery!.visible = !!gridVisible);
   }
 
-  update(gridDimensions: Dimensions, gridSteps: number) {
-    this.createGeometry(gridDimensions, gridSteps)
-  }
 
-  createGeometry({ width, height }: Dimensions, steps: number = 1) {
+  createGeometry(renderer: Renderer, grid: GridProps) {
+    const { containerHeight: height, containerWidth: width, stepsWidth: steps } = grid;
+
+    this.containerWidth = width;
+    this.containerHeight = height;
+    this.stepsWidth = steps;
+    this.stepsHeight = steps;
+
     const topLeftX = width / 2 * -1;
     const topLeftY = height / 2 * -1;
     const stepSizeWidth = width / steps;
@@ -42,8 +49,8 @@ class Grid {
       const geometry2 = this.createLine(topLeftX, vertical, topLeftX + width, vertical)
       group.add(new THREE.Line(geometry2, (step === 0 ? axisMaterial : material)));
     }
-
-    return group;
+    this.geometery = group;
+    renderer.add(group)
   }
   /**
    * 
@@ -67,6 +74,7 @@ class Grid {
    */
   remove(scene: THREE.Scene) {
     this.geometery && scene.remove(this.geometery)
+    this.geometery = null;
   }
 }
 export default Grid;

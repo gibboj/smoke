@@ -20,6 +20,7 @@ export class Renderer implements RenderProps {
   raycaster: THREE.Raycaster
   mouse: THREE.Vector2
   element?: HTMLDivElement
+
   constructor() {
     this.scene = new THREE.Scene();
     this.renderer = new THREE.WebGLRenderer();
@@ -29,6 +30,10 @@ export class Renderer implements RenderProps {
   }
 
   init({ element }: RenderInitProps) {
+    if (this.element) {
+      console.warn("Already initiated, if you mean to recreate, clear first")
+      return
+    }
     this.element = element;
     element.appendChild(this.renderer.domElement);
     element.addEventListener('mousemove', this.onMouseMove, false);

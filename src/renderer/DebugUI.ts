@@ -1,27 +1,33 @@
 import * as THREE from "three";
-import { Dimensions, GRID_DEFAULT_DIMENSIONS, GRID_DEFAULT_STEPS } from "../constants";
+import { GridProps } from "../constants";
 import { Renderer } from "./Renderer";
 
 
+type DebugUIProps = {} & GridProps;
+class DebugUI implements DebugUIProps {
+  containerWidth: number;
+  containerHeight: number;
+  stepsWidth: number;
+  stepsHeight: number;
+  geometery: THREE.Object3D[];
 
-class DebugUI {
-  width: number;
-  height: number;
-  steps: number;
-  geometery: THREE.Group | null;
-
-  constructor({ width, height }: Dimensions = GRID_DEFAULT_DIMENSIONS, steps: number = GRID_DEFAULT_STEPS) {
-    this.width = width;
-    this.height = height;
-    this.steps = steps;
-    this.geometery = null;
+  constructor(props: DebugUIProps) {
+    this.containerWidth = props.containerWidth;
+    this.containerHeight = props.containerHeight;
+    this.stepsWidth = props.stepsWidth;
+    this.stepsHeight = props.stepsHeight;
+    this.geometery = [];
   }
 
-  setVisibility(gridVisible: Boolean) {
-    this.geometery && (this.geometery!.visible = !!gridVisible);
-  }
 
-  createGeometry(renderer: Renderer, { width, height }: Dimensions, steps: number = 1) {
+  createGeometry(renderer: Renderer, grid: GridProps) {
+    const { containerHeight: height, containerWidth: width, stepsWidth: steps } = grid
+
+    this.containerWidth = width;
+    this.containerHeight = height;
+    this.stepsWidth = steps;
+    this.stepsHeight = steps;
+
     const stepSizeWidth = width / steps;
     const stepSizeHeight = height / steps;
     const topLeftX = width / 2 * -1 + stepSizeWidth * 0.5;
@@ -35,6 +41,7 @@ class DebugUI {
       const circle = new THREE.Mesh(geometry, material);
       circle.position.set(horizontal, vertical, 0)
       renderer.add(circle);
+      this.geometery.push(circle)
     }
   }
   /**
@@ -58,7 +65,9 @@ class DebugUI {
    * @param scene 
    */
   remove(scene: THREE.Scene) {
-    this.geometery && scene.remove(this.geometery)
+    this.geometery && scene.remove(...this.geometery)
+    this.geometery = []
   }
 }
+
 export default DebugUI;
